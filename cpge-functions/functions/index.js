@@ -16,9 +16,10 @@ const firebaseConfig = {
 };
 const firebase=require('firebase');
 firebase.initializeApp(firebaseConfig);
+const db = admin.firestore();
 
 app.get('/screams',(req,res)=>{
-  admin.firestore().collection('screams').orderBy('createdAt','desc').get()
+  db.collection('screams').orderBy('createdAt','desc').get()
        .then(data => {
          let screams=[];
          data.forEach(doc=>{
@@ -39,7 +40,7 @@ app.post('/scream',(req,res)=>{
     body : req.body.body,
     userHandle : req.body.userHandle,
     createdAt:new Date().toISOString()};
-  admin.firestore().collection('screams')
+    db.collection('screams')
        .add(newScream)
        .then(doc=>{
          res.json({message : 'The scream was created Successufly'});
@@ -57,16 +58,25 @@ app.post('/SignUp',(req,res)=>{
     confirmPassword:req.body.confirmPassword,
     handle:req.body.handle,
   };
-  //TODO
-  firebase.auth().createUserWithEmailAndPassword(newUser.email,newUser.password)
-  .then((data)=>{
-    return res
-    .status(201)
-    .json({message:'User created successfuly'});
-  })
-  .catch((err)=>{
-    console.log(err);
-    return res.status(500).json({error:err.code});
-  });
+  //TODO Validate Data
+  db.doc('/users/'+newUser.handle).get()
+    .then(doc=>{
+      if(doc.exists){
+        return res.status(400).json({message:'User handler already taken'})
+      }else{
+        return firebase.auth().createUserWithEmailAndPassword(newUser.email,newUser.password);
+      }
+    })
+    .then(data=>{
+      return data.user.getIdToken();
+    })
+    .then(token=>{
+      return res.status(201).json({token});
+    })
+    .catch(err=>{
+      console.log(err);
+      return res.status(500).json({error:err.code});
+    })
+  
 });
 exports.api=functions.region('europe-west1').https.onRequest(app);
