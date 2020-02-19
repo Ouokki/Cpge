@@ -29,7 +29,7 @@ exports.createScreams=functions.https.onRequest((req,res)=>{
   admin.firestore().collection('screams')
        .add(newScream)
        .then(doc=>{
-         res.json({message : 'document ${doc.id} created Successufly'});
+         res.json({message : 'The scream was created Successufly'});
        })
        .catch(err=>{
          res.status(500).json({error:'something went wrong'});
