@@ -1,14 +1,21 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-
-// // Create and Deploy Your First Cloud Functions
-// // https://firebase.google.com/docs/functions/write-firebase-functions
-
 admin.initializeApp({
   credential: admin.credential.cert(require('./keys/admin.json'))
 });
-const express=require('express');
-const app = express();
+const app=require('express')();
+const firebaseConfig = {
+  apiKey: "AIzaSyCURMxlNoDObmnMMOlsAAjY3pSrNxjEpB0",
+  authDomain: "cpge-app.firebaseapp.com",
+  databaseURL: "https://cpge-app.firebaseio.com",
+  projectId: "cpge-app",
+  storageBucket: "cpge-app.appspot.com",
+  messagingSenderId: "291077683094",
+  appId: "1:291077683094:web:d56b07afeb3775be444fb7",
+  measurementId: "G-RMNR7HP0GE"
+};
+const firebase=require('firebase');
+firebase.initializeApp(firebaseConfig);
 
 app.get('/screams',(req,res)=>{
   admin.firestore().collection('screams').orderBy('createdAt','desc').get()
@@ -42,5 +49,24 @@ app.post('/scream',(req,res)=>{
          console.log(err);
        });
 });
-//https://apidatabase/api/....
+// SIGNUP 
+app.post('/SignUp',(req,res)=>{
+  const newUser={
+    email:req.body.email,
+    password:req.body.password,
+    confirmPassword:req.body.confirmPassword,
+    handle:req.body.handle,
+  };
+  //TODO
+  firebase.auth().createUserWithEmailAndPassword(newUser.email,newUser.password)
+  .then((data)=>{
+    return res
+    .status(201)
+    .json({message:'User created successfuly'});
+  })
+  .catch((err)=>{
+    console.log(err);
+    return res.status(500).json({error:err.code});
+  });
+});
 exports.api=functions.region('europe-west1').https.onRequest(app);
