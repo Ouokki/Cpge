@@ -7,10 +7,10 @@ const admin = require('firebase-admin');
 admin.initializeApp({
   credential: admin.credential.cert(require('./keys/admin.json'))
 });
-exports.helloWorld = functions.https.onRequest((request, response) => {
-  response.send("Hello World");
- });
-exports.getScreams=functions.https.onRequest((req,res)=>{
+const express=require('express');
+const app = express();
+
+app.get('/screams',(req,res)=>{
   admin.firestore().collection('screams').get()
        .then(data => {
          let screams=[];
@@ -20,7 +20,8 @@ exports.getScreams=functions.https.onRequest((req,res)=>{
          return res.json(screams);
        })
        .catch(err=>{console.error(err)});
-});
+})
+
 exports.createScreams=functions.https.onRequest((req,res)=>{
   const newScream={
     body : req.body.body,
@@ -36,3 +37,5 @@ exports.createScreams=functions.https.onRequest((req,res)=>{
          console.log(err);
        });
 });
+//https://apidatabase/api/....
+exports.api=functions.region('europe-west1').https.onRequest(app);
