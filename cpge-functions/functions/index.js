@@ -33,12 +33,38 @@ app.get('/screams',(req,res)=>{
          return res.json(screams);
        })
        .catch(err=>{console.error(err)});
-})
-
-app.post('/scream',(req,res)=>{
+});
+// POST a scream
+const FBAuth =(req,res,next)=>{
+  let idToken;
+  if(req.headers.authorization && req.headers.authorization.startsWith('Bearer ')){
+      idToken=req.headers.authorization.split('Bearer ')[1];
+  }else {
+    console.error("no token found");
+    return res.status(403).json({error:'Unauthorized'});
+  }
+  admin.auth().verifyIdToken(idToken)
+  .then((decodedToken)=>{
+    req.user=decodedToken;
+    console.log(decodedToken);
+    return db.collection('users')
+    .where('userId','==',req.user.uid)
+    .limit(1)
+    .get();
+  })
+  .then((data)=>{
+    req.user.handle=data.docs[0].data().handle;
+    return next();
+  })
+  .catch((err)=>{
+    console.error("Error while verifying token",err);
+    return res.status(400).json(err);
+  })
+};
+app.post('/scream',FBAuth,(req,res)=>{
   const newScream={
     body : req.body.body,
-    userHandle : req.body.userHandle,
+    userHandle : req.user.handle,
     createdAt:new Date().toISOString()};
     db.collection('screams')
        .add(newScream)
@@ -46,8 +72,9 @@ app.post('/scream',(req,res)=>{
          res.json({message : 'The scream was created Successufly'});
        })
        .catch(err=>{
-         res.status(500).json({error:'something went wrong'});
-         console.log(err);
+          console.log(err);
+          return res.status(500).json({error:'something went wrong'});
+         
        });
 });
 const isEmpty =  (string)=>{
@@ -58,7 +85,6 @@ const isEmail = (email)=>{
   const regEx=/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   if (email.match(regEx)) return true ;
   else return false ;
-
 }
 // SIGNUP Route 
 app.post('/SignUp',(req,res)=>{
@@ -115,5 +141,33 @@ app.post('/SignUp',(req,res)=>{
       
     })
   
+});
+//LOGIN Route 
+app.post('/login',(req,res)=>{
+  const userCredentials={
+    email:req.body.email,
+    password:req.body.password,
+  };
+  let errors={};
+  if(isEmpty(userCredentials.password)) errors.password='Must be not empty';
+  if(isEmpty(userCredentials.email)) errors.email='Must be not empty';
+  if(Object.keys(errors).length>0) return res.status(400).json(errors);
+  firebase
+  .auth()
+  .signInWithEmailAndPassword(userCredentials.email,userCredentials.password)
+  .then((data)=>{
+    return data.user.getIdToken();
+  })
+  .then((token)=>{
+    return res.json({token});
+  })
+  .catch((err)=>{
+    console.log(err);
+      if(err.code==='auth/wrong-password' || err.code==='auth/user-not-found'){
+        return res.status(400).json({message:'Wrong credentials , please sign up'})
+      }else{
+        return res.status(500).json({error:err.code});
+      }
+  });
 });
 exports.api=functions.region('europe-west1').https.onRequest(app);
