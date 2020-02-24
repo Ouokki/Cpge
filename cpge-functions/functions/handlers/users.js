@@ -103,7 +103,7 @@ exports.uploadImage=(req,res)=>{
     const busboy=new BusBoy({headers:req.headers});
     let imageFileName;
     let imageToBeUploaded={};
-    busboy.on('file',(fieldame,file,filename,encoding,mimetype)=>{
+    busboy.on('file',(fieldname,file,filename,encoding,mimetype)=>{
         console.log(fieldname);
         console.log(filename);
         console.log(mimetype);
@@ -116,7 +116,7 @@ exports.uploadImage=(req,res)=>{
         file.pipe(fs.createWriteStream(filepath));
     });
     busboy.on('finish',()=>{
-        admin.storage().bucket().upload(imageToBeUploaded,filepath,{
+        admin.storage().bucket(firebaseConfig.storageBucket).upload(imageToBeUploaded.filepath,{
             resumable:false,
             metadata:{
                 metadata:{
@@ -124,16 +124,18 @@ exports.uploadImage=(req,res)=>{
                 }
             }
         })
+        .then(()=>{
+          const imageUrl='https://firebasestorage.googleapis.com/v0/b/'+firebaseConfig.storageBucket+'/o/'+imageFileName+'?alt=media';
+          return db.doc('/users'+req.user.handle).update({imageUrl});
+        })
+        .then(()=>{
+            return res.json({message:'Image uploaded successfuly'});
+        })
+        .catch(err=>{
+            console.log(err);
+            return res.status(500).json({error:err.code});
+        })
     })
-    .then(()=>{
-        const imageUrl='https://firebasestorage.googleapis.com/v0/b/'+firebaseConfig.storageBucket+'/o/'+imageFileName+'?alt=media';
-        return db.doc('/users'+req.user.handle).update({imageUrl});
-    })
-    .then(()=>{
-        return res.json({message:'Image uploaded successfuly'});
-    })
-    .catch(err=>{
-        console.log(err);
-        return res.status(500).json({error:err.code});
-    })
+    busboy.end(req.rawBody);
+    
 }
