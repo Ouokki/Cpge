@@ -1,6 +1,7 @@
 const {admin,db}=require('../util/admin');
 const {firebaseConfig}=require('../util/config');
 const firebase=require('firebase');
+//Help Functions
 const isEmpty =  (string)=>{
     if(string.trim()==='') return true;
     else return false ;
@@ -10,6 +11,18 @@ const isEmail = (email)=>{
     if (email.match(regEx)) return true ;
     else return false ;
   }
+const reduceUserDetails=(data)=>{
+  let userDetails={};
+  if(!isEmpty(data.bio.trim())) userDetails.bio=data.bio;
+  if(!isEmpty(data.website.trim())){
+    //https://website.com
+    if(data.website.trim().substring(0,4)!=='http'){
+      userDetails.website='http://'+data.website.trim();
+    }else userDetails.website=data.website;
+  }
+  if(!isEmpty(data.location.trim())) userDetails.location;
+  return userDetails;
+}
 
 exports.signUp=(req,res)=>{
     const newUser={
@@ -58,15 +71,13 @@ exports.signUp=(req,res)=>{
         return res.status(201).json({token});
       })
       .catch(err=>{
-        console.log(err);
         if(err.code==='auth/email-already-in-use'){
           return res.status(400).json({message:'The email is already in use'})
         }else{
           return res.status(500).json({error:err.code});
         }
-        
-      })
-  }
+      });
+  };
 exports.login=(req,res)=>{
     const userCredentials={
       email:req.body.email,
@@ -86,14 +97,13 @@ exports.login=(req,res)=>{
       return res.json({token});
     })
     .catch((err)=>{
-      console.log(err);
         if(err.code==='auth/wrong-password' || err.code==='auth/user-not-found'){
           return res.status(400).json({message:'Wrong credentials , please sign up'})
         }else{
           return res.status(500).json({error:err.code});
         }
     });
-  }
+  };
 
 exports.uploadImage=(req,res)=>{
     const BusBoy=require('busboy');
@@ -130,10 +140,44 @@ exports.uploadImage=(req,res)=>{
             return res.json({message:'Image uploaded successfuly'});
         })
         .catch(err=>{
-            console.log(err);
             return res.status(500).json({error:err.code});
         })
     })
-    busboy.end(req.rawBody);
-    
-}
+    busboy.end(req.rawBody);   
+};
+//Add user details
+exports.addUserdetails=(req,res)=>{
+  let userDetails=reduceUserDetails(req.body);
+  db.doc('/users/'+req.user.handle)
+  .update(userDetails)
+  .then(()=>{
+    return res.json({message:'Details added successufly'})
+  })
+  .catch((err)=>{
+    console.log(err);
+    return res.status(500).json({error:err.code})
+  });
+};
+//Get User Details 
+exports.getAuthenticatedUser=(req,res)=>{
+  let userData={};
+  db.doc('/users/'+req.user.handle)
+  .get()
+  .then((doc)=>{
+    if(doc.exists){
+      userData.credentials=doc.data();
+      return db.collection('likes').where('userHandle','==',req.user.handle).get();
+    }
+  })
+  .then((data)=>{
+    userData.likes=[];
+    data.forEach((doc)=>{
+      userData.likes.push(doc.data());
+    });
+    return res.json(userData);
+  })
+  .catch((err)=>{
+    console.log(err);
+    return res.status(500).json({error:err.code});
+  });
+};
