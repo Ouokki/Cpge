@@ -20,9 +20,9 @@ app.delete('/scream/:screamId',FBAuth,deleteScream);
 // Commenting on a scream
 app.post('/scream/:screamId/comment',FBAuth,commentOnscream);
 //Like a scream 
-app.get('/scream/:screamId/like',likeScream);
+app.get('/scream/:screamId/like',FBAuth,likeScream);
 //Unlike a scream
-app.get('/scream/:screamId/unlike',unlikeScream);
+app.get('/scream/:screamId/unlike',FBAuth,unlikeScream);
 
 //Users
 app.post('/user/image',FBAuth,uploadImage);

@@ -95,8 +95,7 @@ exports.commentOnscream=(req,res)=>{
 };
 // Like a scream
 exports.likeScream=(req,res)=>{
-  const likeDocument = db.collection('likes').where('userHandle','==',req.user.handle)
-                         .where('screamId','==',req.params.screamId).limit(1);
+  const likeDocument = db.collection('likes').where('userHandle','==',req.user.handle).where('screamId','==',req.params.screamId).limit(1);
   const screamDocument=db.doc('/screams/'+req.params.screamId);
   let screamData;
   screamDocument.get()
@@ -144,7 +143,7 @@ exports.unlikeScream=(req,res)=>{
                     screamData.screamId=doc.id;
                     return likeDocument.get();
                   }else{
-                    return res.status(404).json({error:'Scream Nt found'});
+                    return res.status(404).json({error:'Scream Not found'});
                   }
                 })
                 .then(data=>{
