@@ -1,0 +1,21 @@
+.btn-custom-login{
+    background-color: #E4FFF9;
+    text-shadow: black;
+    border-radius: 20px;
+    position: relative;
+}
+.btn-custom-login:hover {
+    background-color:transparent; 
+    border-color:#45D09E ;
+}
+.btn-custom-regist{
+    background-color: #76FEC5;
+    text-shadow: black;
+    border-radius: 20px;
+    position: relative;
+}
+.btn-custom-regist:hover {
+    background-color:#45D09E; 
+    border-color:black ;
+    
+}
