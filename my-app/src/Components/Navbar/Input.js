@@ -1,5 +1,5 @@
 import React from 'react'
-import './Input.css'
+import './styles/Input.css'
 function Input() {
     return (
         <div>
