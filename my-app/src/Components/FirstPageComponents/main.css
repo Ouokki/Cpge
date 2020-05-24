@@ -1,0 +1,10 @@
+.right{
+    width: 58%;
+    height: auto;
+}
+.right-resized{
+    width: 90%;
+    margin-right: auto;
+    margin-left: auto;
+    height: auto;
+}
