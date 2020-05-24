@@ -6,7 +6,7 @@ import RegistButton from './Buttons/RegistButton';
 function Navbar() {
     
   return (
-           <nav className="navbar navbar-expand-lg navbar-transparent bg-transparent border">
+           <nav className="navbar navbar-expand-lg navbar-transparent bg-transparent border-bottom">
                 <div className="container">
                     <a className="navbar-brand" href="#">CPGE XXXX----</a>
                     <div className="row">

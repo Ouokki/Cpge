@@ -1,42 +1,42 @@
 .btn-custom-login{
-    background-color: #E4FFF9;
+    background-color: #B7D4FF;
     text-shadow: black;
     border-radius: 20px;
     position: relative;
 }
 .btn-custom-login:hover {
     background-color:transparent; 
-    border-color:#45D09E ;
+    border-color:#7EB3FF ;
 }
 .btn-custom-regist{
-    background-color: #76FEC5;
+    background-color: #51EAFF;
     text-shadow: black;
     border-radius: 20px;
     position: relative;
 }
 .btn-custom-regist:hover {
-    background-color:#45D09E; 
-    border-color:black ;
+    background-color:#D7FFFE; 
+    border-color:#7EB3FF;
     
 }
 .btn-custom-login-bottom{
-    background-color: #E4FFF9;
+    background-color: #B7D4FF;
     text-shadow: black;
     border-radius: 20px;
     position: relative;
 }
 .btn-custom-login-bottom:hover {
     background-color:transparent; 
-    border-color:#45D09E ;
+    border-color:#7EB3FF ;
 }
 .btn-custom-regist-bottom{
-    background-color: #76FEC5;
+    background-color: #51EAFF;
     text-shadow: black;
     border-radius: 20px;
     position: relative;
 }
 .btn-custom-regist-bottom:hover {
     background-color:#45D09E; 
-    border-color:black ;
+    border-color:#7EB3FF;
     
 }
